@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Search Vehicles</h2>
+    <a href="{{ url_for('bookings.dashboard') }}" class="btn btn-outline-secondary">Back to Dashboard</a>
+</div>
+
+<!-- Search Bar -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="POST">
+            <div class="input-group">
+                <input type="text" name="query" class="form-control" placeholder="Search by Make, Model, or License Plate..." value="{{ query }}">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Results Table -->
+<div class="card">
+    <div class="card-body">
+        {% if vehicles %}
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>License Plate</th>
+                    <th>Make</th>
+                    <th>Model</th>
+                    <th>Year</th>
+                    <th>Daily Rate</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for vehicle in vehicles %}
+                <tr>
+                    <td>{{ vehicle.id }}</td>
+                    <td>{{ vehicle.license_plate }}</td>
+                    <td>{{ vehicle.make }}</td>
+                    <td>{{ vehicle.model }}</td>
+                    <td>{{ vehicle.year }}</td>
+                    <td>${{ vehicle.daily_rate }}</td>
+                    <td>
+                        {% if vehicle.status == 'Available' %}
+                            <span class="badge bg-success">{{ vehicle.status }}</span>
+                        {% elif vehicle.status == 'Rented' %}
+                            <span class="badge bg-warning text-dark">{{ vehicle.status }}</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ vehicle.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if vehicle.status == 'Available' %}
+                        <!-- FIXED: This now links to the new book_vehicle route -->
+                        <a href="{{ url_for('bookings.book_vehicle', vehicle_id=vehicle.id) }}" class="btn btn-sm btn-primary">Book Now</a>
+                        {% else %}
+                        <button class="btn btn-sm btn-secondary" disabled>Unavailable</button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="text-center py-5">
+            <h5 class="text-muted">No vehicles found matching your search.</h5>
+            <p class="text-muted">Try a different keyword or add new vehicles to the fleet.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

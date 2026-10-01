@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Book Vehicle: {{ vehicle.make }} {{ vehicle.model }}</h2>
+    <a href="{{ url_for('bookings.search_vehicles') }}" class="btn btn-outline-secondary">Back to Search</a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <strong>Vehicle Details:</strong> {{ vehicle.license_plate }} | 
+                    <strong>Daily Rate:</strong> ${{ vehicle.daily_rate }}
+                </div>
+                
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="customer_id" class="form-label">Select Customer</label>
+                            <select class="form-control" id="customer_id" name="customer_id" required>
+                                <option value="">-- Choose a customer --</option>
+                                {% for customer in customers %}
+                                <option value="{{ customer.customer_id }}">{{ customer.full_name }} ({{ customer.phone }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="start_date" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="start_date" name="start_date" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="end_date" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="end_date" name="end_date" required>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success mt-3">Confirm Booking</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

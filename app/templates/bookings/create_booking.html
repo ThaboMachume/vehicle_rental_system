@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Create Booking - VRMS{% endblock %}
+
+{% block page_title %}Create New Booking{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> 
+                    <strong>{{ vehicle.make }} {{ vehicle.model }}</strong> - 
+                    R{{ "%.2f"|format(vehicle.daily_rate) }}/day
+                    <span class="badge bg-{{ vehicle.get_status_color() }} ms-2">{{ vehicle.status }}</span>
+                </div>
+
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Customer ID</label>
+                        <input type="number" class="form-control" name="customer_id" required 
+                               placeholder="Enter customer ID">
+                        <small class="text-muted">Need to register a new customer? <a href="#">Click here</a></small>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Start Date</label>
+                                <input type="date" class="form-control" name="start_date" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">End Date</label>
+                                <input type="date" class="form-control" name="end_date" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-circle"></i> Create Booking
+                        </button>
+                        <a href="{{ url_for('bookings.search_vehicles') }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h6 class="mb-0"><i class="bi bi-info-circle"></i> Vehicle Details</h6>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-5">Make</dt>
+                    <dd class="col-sm-7">{{ vehicle.make }}</dd>
+                    
+                    <dt class="col-sm-5">Model</dt>
+                    <dd class="col-sm-7">{{ vehicle.model }}</dd>
+                    
+                    <dt class="col-sm-5">Year</dt>
+                    <dd class="col-sm-7">{{ vehicle.year }}</dd>
+                    
+                    <dt class="col-sm-5">License Plate</dt>
+                    <dd class="col-sm-7">{{ vehicle.license_plate }}</dd>
+                    
+                    <dt class="col-sm-5">Fuel Type</dt>
+                    <dd class="col-sm-7">{{ vehicle.fuel_type }}</dd>
+                    
+                    <dt class="col-sm-5">Seating</dt>
+                    <dd class="col-sm-7">{{ vehicle.seating_capacity }}</dd>
+                    
+                    <dt class="col-sm-5">Daily Rate</dt>
+                    <dd class="col-sm-7 text-primary fw-bold">R{{ "%.2f"|format(vehicle.daily_rate) }}</dd>
+                    
+                    <dt class="col-sm-5">Status</dt>
+                    <dd class="col-sm-7">
+                        <span class="badge bg-{{ vehicle.get_status_color() }}">
+                            {{ vehicle.status }}
+                        </span>
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+    
+    document.querySelector('input[name="start_date"]').value = today;
+    document.querySelector('input[name="end_date"]').value = tomorrow;
+});
+</script>
+{% endblock %}

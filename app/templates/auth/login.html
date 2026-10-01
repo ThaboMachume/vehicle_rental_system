@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Login - VRMS{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-primary text-white text-center py-4">
+                <h3><i class="bi bi-car-front"></i> VRMS</h3>
+                <p class="mb-0 small">Vehicle Rental Management System</p>
+            </div>
+            <div class="card-body p-4">
+                <h5 class="text-center mb-3">Sign In</h5>
+                <form method="POST" action="{{ url_for('auth.login') }}">
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            <input type="text" class="form-control" name="username" 
+                                   placeholder="Enter username" required autofocus>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                            <input type="password" class="form-control" name="password" 
+                                   placeholder="Enter password" required>
+                        </div>
+                    </div>
+                    
+                    <!-- FORGOT PASSWORD LINK -->
+                    <div class="text-end mb-3">
+                        <a href="{{ url_for('auth.forgot_password') }}" class="small text-muted">
+                            <i class="bi bi-question-circle"></i> Forgot Password?
+                        </a>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-box-arrow-in-right"></i> Sign In
+                    </button>
+                </form>
+                
+                <hr class="my-4">
+                
+                <div class="text-center">
+                    <p class="text-muted small mb-2">Quick Login (Demo)</p>
+                    <div class="d-flex justify-content-center gap-2 flex-wrap">
+                        <button class="btn btn-sm btn-outline-danger" onclick="fillLogin('admin', 'admin123')">
+                            <i class="bi bi-shield-lock"></i> Admin
+                        </button>
+                        <button class="btn btn-sm btn-outline-info" onclick="fillLogin('manager', 'manager123')">
+                            <i class="bi bi-bar-chart"></i> Manager
+                        </button>
+                        <button class="btn btn-sm btn-outline-success" onclick="fillLogin('clerk', 'clerk123')">
+                            <i class="bi bi-person"></i> Clerk
+                        </button>
+                    </div>
+                    <p class="mt-2 small text-muted">
+                        <i class="bi bi-info-circle"></i> 
+                        Admin: Full access | Manager: Reports | Clerk: Basic operations
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function fillLogin(username, password) {
+    document.querySelector('input[name="username"]').value = username;
+    document.querySelector('input[name="password"]').value = password;
+    document.querySelector('input[name="username"]').classList.add('is-valid');
+    document.querySelector('input[name="password"]').classList.add('is-valid');
+}
+</script>
+{% endblock %}

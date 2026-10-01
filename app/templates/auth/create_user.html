@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Create User - VRMS{% endblock %}
+
+{% block page_title %}Create New User{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-person-plus"></i> Create User Account</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <input type="text" class="form-control" name="username" required 
+                               placeholder="Enter username">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-control" name="password" required 
+                               placeholder="Enter password">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Role</label>
+                        <select class="form-select" name="role" required>
+                            <option value="">Select Role</option>
+                            <option value="Administrator">Administrator</option>
+                            <option value="Manager">Manager</option>
+                            <option value="Clerk">Clerk</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Employee ID</label>
+                        <input type="text" class="form-control" name="employee_id" 
+                               placeholder="Enter employee ID">
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> Create User
+                    </button>
+                    <a href="{{ url_for('bookings.dashboard') }}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Cancel
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block title %}Reports - VRMS{% endblock %}
+{% block page_title %}Reports & Analytics{% endblock %}
+
+{% block content %}
+<!-- Stat Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card card-stats shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="text-muted">Total Fleet</h6>
+                        <h2 class="mb-0">{{ total_vehicles }}</h2>
+                    </div>
+                    <div class="text-primary fs-1"><i class="bi bi-car-front"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-stats shadow-sm" style="border-left-color: #0d6efd;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="text-muted">Total Bookings</h6>
+                        <h2 class="mb-0">{{ total_bookings }}</h2>
+                    </div>
+                    <div class="text-primary fs-1"><i class="bi bi-calendar-check"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-stats shadow-sm" style="border-left-color: #198754;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="text-muted">Total Customers</h6>
+                        <h2 class="mb-0">{{ total_customers }}</h2>
+                    </div>
+                    <div class="text-success fs-1"><i class="bi bi-people"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-stats shadow-sm" style="border-left-color: #198754;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="text-muted">Total Revenue</h6>
+                        <h2 class="mb-0">${{ "%.2f"|format(total_revenue) }}</h2>
+                    </div>
+                    <div class="text-success fs-1"><i class="bi bi-currency-dollar"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Report Action Buttons -->
+<div class="row mb-4">
+    <div class="col-md-6 mb-2">
+        <a href="{{ url_for('reports.daily_sales') }}" class="btn btn-primary w-100">
+            <i class="bi bi-calendar-day"></i> Daily Sales Report
+        </a>
+    </div>
+    <div class="col-md-6 mb-2">
+        <a href="{{ url_for('reports.customer_history') }}" class="btn btn-info text-white w-100">
+            <i class="bi bi-person-lines-fill"></i> Customer Rental History
+        </a>
+    </div>
+</div>
+
+<!-- CHARTS ROW -->
+<div class="row mb-4">
+    <div class="col-md-5">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Fleet Status Breakdown</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="fleetChart" style="max-height: 300px;"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-7">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Revenue by Payment Method</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="revenueChart" style="max-height: 300px;"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-graph-up-arrow"></i> Monthly Revenue Trend</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="monthlyChart" style="max-height: 250px;"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fleet Status & Operations Tables -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-truck"></i> Fleet Status Details</h5>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <td><span class="badge bg-success">Available</span></td>
+                            <td class="text-end"><strong>{{ available_vehicles }}</strong></td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge bg-warning text-dark">Booked</span></td>
+                            <td class="text-end"><strong>{{ booked_vehicles }}</strong></td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge bg-danger">Rented</span></td>
+                            <td class="text-end"><strong>{{ rented_vehicles }}</strong></td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge bg-secondary">Maintenance</span></td>
+                            <td class="text-end"><strong>{{ maintenance_vehicles }}</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-graph-up"></i> Operations Overview</h5>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <td><i class="bi bi-calendar-check text-primary"></i> Active Rentals</td>
+                            <td class="text-end"><strong>{{ active_rentals }}</strong></td>
+                        </tr>
+                        <tr>
+                            <td><i class="bi bi-clock-history text-warning"></i> Pending Bookings</td>
+                            <td class="text-end"><strong>{{ total_bookings - active_rentals }}</strong></td>
+                        </tr>
+                        <tr>
+                            <td><i class="bi bi-people text-success"></i> Registered Customers</td>
+                            <td class="text-end"><strong>{{ total_customers }}</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-white">
+        <h5 class="mb-0"><i class="bi bi-clock-history"></i> Recent Bookings</h5>
+    </div>
+    <div class="card-body">
+        {% if recent_bookings %}
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Confirmation</th>
+                    <th>Customer</th>
+                    <th>Vehicle</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in recent_bookings %}
+                <tr>
+                    <td><code>{{ booking.confirmation_no }}</code></td>
+                    <td>{{ booking.customer.full_name }}</td>
+                    <td>{{ booking.vehicle.make }} {{ booking.vehicle.model }}</td>
+                    <td><span class="badge bg-info">{{ booking.status }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted text-center py-3">No bookings available yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    new Chart(document.getElementById('fleetChart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Available', 'Booked', 'Rented', 'Maintenance'],
+            datasets: [{
+                data: [{{ available_vehicles }}, {{ booked_vehicles }}, {{ rented_vehicles }}, {{ maintenance_vehicles }}],
+                backgroundColor: ['#198754', '#ffc107', '#dc3545', '#6c757d'],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+    });
+
+    new Chart(document.getElementById('revenueChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: ['Cash', 'Card', 'EFT'],
+            datasets: [{
+                label: 'Revenue ($)',
+                data: [{{ cash_revenue }}, {{ card_revenue }}, {{ eft_revenue }}],
+                backgroundColor: ['#198754', '#0d6efd', '#6f42c1']
+            }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+    });
+
+    new Chart(document.getElementById('monthlyChart').getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: {{ monthly_labels|tojson }},
+            datasets: [{
+                label: 'Revenue ($)',
+                data: {{ monthly_totals|tojson }},
+                borderColor: '#0d6efd',
+                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Rental Agreement - VRMS{% endblock %}
+{% block page_title %}Rental Agreement / Contract{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-file-earmark-text"></i> Rental Agreement</h2>
+    <div>
+        <a href="{{ url_for('bookings.view_booking', booking_id=booking.booking_id) }}" class="btn btn-outline-secondary">Back</a>
+        <button onclick="window.print()" class="btn btn-primary">
+            <i class="bi bi-printer"></i> Print Contract
+        </button>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-5">
+        <!-- Letterhead -->
+        <div class="text-center mb-4 border-bottom pb-3">
+            <h2 class="text-primary"><i class="bi bi-car-front"></i> VRMS</h2>
+            <p class="mb-0"><strong>Vehicle Rental Management System</strong></p>
+            <p class="text-muted small mb-0">
+                123 Main Road, Kimberley, NC 8301<br>
+                Phone: +27 12 345 6789 | Email: info@vrms.com
+            </p>
+        </div>
+
+        <h3 class="text-center mb-4">RENTAL AGREEMENT CONTRACT</h3>
+
+        <!-- Agreement Meta -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <p class="mb-1"><strong>Agreement Number:</strong> <code>{{ agreement.agreement_number }}</code></p>
+                <p class="mb-1"><strong>Booking Reference:</strong> {{ booking.confirmation_no }}</p>
+                <p class="mb-1"><strong>Date Issued:</strong> {{ agreement.checkout_datetime.strftime('%d %b %Y') if agreement.checkout_datetime else booking.start_date.strftime('%d %b %Y') }}</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <p class="mb-1"><strong>Status:</strong> 
+                    {% if agreement.status == 'Active' %}
+                        <span class="badge bg-primary">Active</span>
+                    {% elif agreement.status == 'Completed' %}
+                        <span class="badge bg-success">Completed</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark">{{ agreement.status }}</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <!-- Customer Details -->
+        <h5 class="border-bottom pb-2">1. The Renter (Customer)</h5>
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <p class="mb-1"><strong>Full Name:</strong> {{ booking.customer.full_name }}</p>
+                <p class="mb-1"><strong>ID Number:</strong> {{ booking.customer.id_number }}</p>
+                <p class="mb-1"><strong>Driver's License:</strong> {{ booking.customer.drivers_license }}</p>
+            </div>
+            <div class="col-md-6">
+                <p class="mb-1"><strong>Phone:</strong> {{ booking.customer.phone }}</p>
+                <p class="mb-1"><strong>Email:</strong> {{ booking.customer.email }}</p>
+                <p class="mb-1"><strong>Address:</strong> {{ booking.customer.address or 'N/A' }}</p>
+            </div>
+        </div>
+
+        <!-- Vehicle Details -->
+        <h5 class="border-bottom pb-2">2. The Vehicle</h5>
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <p class="mb-1"><strong>Vehicle:</strong> {{ booking.vehicle.make }} {{ booking.vehicle.model }}</p>
+                <p class="mb-1"><strong>Year:</strong> {{ booking.vehicle.year }}</p>
+                <p class="mb-1"><strong>License Plate:</strong> <code>{{ booking.vehicle.license_plate }}</code></p>
+            </div>
+            <div class="col-md-6">
+                <p class="mb-1"><strong>Fuel Type:</strong> {{ booking.vehicle.fuel_type }}</p>
+                <p class="mb-1"><strong>Color:</strong> {{ booking.vehicle.color }}</p>
+                <p class="mb-1"><strong>Odometer at Checkout:</strong> {{ agreement.checkout_odometer or 'N/A' }} km</p>
+            </div>
+        </div>
+
+        <!-- Rental Period -->
+        <h5 class="border-bottom pb-2">3. Rental Period & Charges</h5>
+        <table class="table table-bordered mb-4">
+            <thead class="table-light">
+                <tr>
+                    <th>Description</th>
+                    <th class="text-end">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Pickup Date: <strong>{{ booking.start_date.strftime('%d %b %Y') }}</strong> — Return Date: <strong>{{ booking.end_date.strftime('%d %b %Y') }}</strong> ({{ booking.rental_days }} days)</td>
+                    <td class="text-end">${{ "%.2f"|format(base_amount) }}</td>
+                </tr>
+                {% if late_fee > 0 %}
+                <tr>
+                    <td>Late Return Fee (15% per day overdue)</td>
+                    <td class="text-end">${{ "%.2f"|format(late_fee) }}</td>
+                </tr>
+                {% endif %}
+                {% if fuel_penalty > 0 %}
+                <tr>
+                    <td>Fuel Penalty</td>
+                    <td class="text-end">${{ "%.2f"|format(fuel_penalty) }}</td>
+                </tr>
+                {% endif %}
+                <tr>
+                    <td class="text-end">Subtotal</td>
+                    <td class="text-end">${{ "%.2f"|format(subtotal) }}</td>
+                </tr>
+                <tr>
+                    <td class="text-end">VAT (15%)</td>
+                    <td class="text-end">${{ "%.2f"|format(vat) }}</td>
+                </tr>
+                <tr class="table-primary">
+                    <td class="text-end"><strong>Total Amount Due</strong></td>
+                    <td class="text-end"><strong>${{ "%.2f"|format(total_due) }}</strong></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Terms and Conditions -->
+        <h5 class="border-bottom pb-2">4. Terms and Conditions</h5>
+        <ol class="small mb-4">
+            <li>The Renter agrees to return the vehicle on or before the scheduled return date.</li>
+            <li>Late returns will be charged a penalty of 15% of the daily rate per day overdue.</li>
+            <li>The vehicle must be returned with at least 90% fuel level, or a fuel penalty will apply.</li>
+            <li>The Renter is responsible for all traffic fines, tolls, and damages incurred during the rental period.</li>
+            <li>The vehicle may not be used for illegal activities, racing, or towing without prior consent.</li>
+            <li>The Renter must hold a valid driver's license for the duration of the rental.</li>
+            <li>The Renter agrees to indemnify VRMS against any loss or damage arising from misuse.</li>
+        </ol>
+
+        <!-- Signature Section -->
+        <h5 class="border-bottom pb-2">5. Signatures</h5>
+        <div class="row mt-4">
+            <div class="col-md-6 mb-5">
+                <p class="mb-5"><strong>Renter's Signature:</strong></p>
+                <div class="border-top border-dark pt-2">
+                    <small>{{ booking.customer.full_name }}</small><br>
+                    <small class="text-muted">Date: ___________________</small>
+                </div>
+            </div>
+            <div class="col-md-6 mb-5">
+                <p class="mb-5"><strong>Authorized Clerk's Signature:</strong></p>
+                <div class="border-top border-dark pt-2">
+                    <small>VRMS Representative</small><br>
+                    <small class="text-muted">Date: ___________________</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center text-muted small mt-5 border-top pt-3">
+            <p class="mb-0">This is a legally binding agreement between VRMS and the Renter.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

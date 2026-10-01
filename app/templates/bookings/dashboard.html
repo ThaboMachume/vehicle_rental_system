@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - VRMS{% endblock %}
+{% block page_title %}Dashboard Overview{% endblock %}
+
+{% block content %}
+<!-- Stats Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card card-stats shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="text-muted">Total Bookings</h6>
+                        <h2 class="mb-0">{{ total_bookings }}</h2>
+                    </div>
+                    <div class="text-primary fs-1">
+                        <i class="bi bi-calendar-check"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-stats shadow-sm" style="border-left-color: #ffc107;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="text-muted">Active Rentals</h6>
+                        <h2 class="mb-0">{{ active_rentals }}</h2>
+                    </div>
+                    <div class="text-warning fs-1">
+                        <i class="bi bi-car-front"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-stats shadow-sm" style="border-left-color: #28a745;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="text-muted">Available Vehicles</h6>
+                        <h2 class="mb-0">{{ available_vehicles }}</h2>
+                    </div>
+                    <div class="text-success fs-1">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-stats shadow-sm" style="border-left-color: #6c757d;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="text-muted">Total Customers</h6>
+                        <h2 class="mb-0">{{ total_customers }}</h2>
+                    </div>
+                    <div class="text-secondary fs-1">
+                        <i class="bi bi-people"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h6 class="mb-3"><i class="bi bi-lightning"></i> Quick Actions</h6>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="{{ url_for('bookings.search_vehicles') }}" class="btn btn-primary">
+                        <i class="bi bi-search"></i> Search Vehicles
+                    </a>
+                    <a href="{{ url_for('bookings.add_customer') }}" class="btn btn-success">
+                        <i class="bi bi-person-plus"></i> New Customer
+                    </a>
+                    <a href="{{ url_for('bookings.add_vehicle') }}" class="btn btn-warning">
+                        <i class="bi bi-car-front"></i> Add Vehicle
+                    </a>
+                    {% if current_user.role in ['Administrator', 'Manager'] %}
+                    <a href="{{ url_for('reports.dashboard') }}" class="btn btn-info text-white">
+                        <i class="bi bi-bar-chart"></i> View Reports
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Bookings -->
+<div class="card shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-clock-history"></i> Recent Bookings</h5>
+        <a href="{{ url_for('bookings.all_bookings') }}" class="btn btn-sm btn-outline-primary">View All</a>
+    </div>
+    <div class="card-body">
+        {% if recent_bookings %}
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+                <thead>
+                    <tr>
+                        <th>Confirmation</th>
+                        <th>Customer</th>
+                        <th>Vehicle</th>
+                        <th>Dates</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in recent_bookings %}
+                    <tr>
+                        <td><code>{{ booking.confirmation_no }}</code></td>
+                        <td>
+                            <strong>{{ booking.customer.full_name }}</strong><br>
+                            <small class="text-muted">{{ booking.customer.phone }}</small>
+                        </td>
+                        <td>
+                            {{ booking.vehicle.make }} {{ booking.vehicle.model }}<br>
+                            <small class="text-muted">{{ booking.vehicle.license_plate }}</small>
+                        </td>
+                        <td>
+                            {{ booking.start_date.strftime('%d %b %Y') }}<br>
+                            <small class="text-muted">to {{ booking.end_date.strftime('%d %b %Y') }}</small>
+                        </td>
+                        <td>
+                            {% set status_colors = {
+                                'Reserved': 'warning',
+                                'Confirmed': 'info',
+                                'Active': 'primary',
+                                'Completed': 'success',
+                                'Cancelled': 'danger'
+                            } %}
+                            <span class="badge bg-{{ status_colors.get(booking.status, 'secondary') }}">
+                                {{ booking.status }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('bookings.view_booking', booking_id=booking.booking_id) }}" 
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <i class="bi bi-inbox fs-1 text-muted"></i>
+            <p class="text-muted mt-2">No bookings found. Start by searching for vehicles!</p>
+            <a href="{{ url_for('bookings.search_vehicles') }}" class="btn btn-primary">
+                <i class="bi bi-search"></i> Search Now
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

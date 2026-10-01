@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Customer Rental History - VRMS{% endblock %}
+{% block page_title %}Customer Rental History{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-person-lines-fill"></i> Customer Rental History</h2>
+    <a href="{{ url_for('reports.dashboard') }}" class="btn btn-outline-secondary">Back to Reports</a>
+</div>
+
+<!-- Search Form -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="POST" class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label">Customer ID</label>
+                <input type="number" class="form-control" name="customer_id" placeholder="e.g., 1">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">OR Customer Name</label>
+                <input type="text" class="form-control" name="customer_name" placeholder="e.g., John Doe">
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-search"></i> Search
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if customer %}
+<!-- Customer Details -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="mb-3"><i class="bi bi-person-circle"></i> Customer Details</h5>
+                <p class="mb-1"><strong>Name:</strong> {{ customer.full_name }}</p>
+                <p class="mb-1"><strong>ID:</strong> CUS-{{ "%03d"|format(customer.customer_id) }}</p>
+                <p class="mb-1"><strong>Phone:</strong> {{ customer.phone }}</p>
+                <p class="mb-1"><strong>Email:</strong> {{ customer.email }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <div class="card card-stats shadow-sm">
+                    <div class="card-body">
+                        <h6 class="text-muted">Total Rentals</h6>
+                        <h3 class="mb-0">{{ total_rentals }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card card-stats shadow-sm" style="border-left-color: #198754;">
+                    <div class="card-body">
+                        <h6 class="text-muted">Total Spent</h6>
+                        <h3 class="mb-0 text-success">${{ "%.2f"|format(total_spent) }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card card-stats shadow-sm" style="border-left-color: #0d6efd;">
+                    <div class="card-body">
+                        <h6 class="text-muted">Avg Duration</h6>
+                        <h3 class="mb-0">{{ "%.1f"|format(avg_duration) }} days</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Previous Rentals -->
+<div class="card shadow-sm">
+    <div class="card-header bg-white">
+        <h5 class="mb-0"><i class="bi bi-clock-history"></i> Previous Rentals</h5>
+    </div>
+    <div class="card-body">
+        {% if bookings %}
+        <table class="table table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Confirmation</th>
+                    <th>Vehicle</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Duration</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in bookings %}
+                <tr>
+                    <td><code>{{ b.confirmation_no }}</code></td>
+                    <td>{{ b.vehicle.make }} {{ b.vehicle.model }}</td>
+                    <td>{{ b.start_date.strftime('%d %b %Y') }}</td>
+                    <td>{{ b.end_date.strftime('%d %b %Y') }}</td>
+                    <td>{{ b.rental_days }} days</td>
+                    <td>
+                        {% set status_colors = {
+                            'Reserved': 'warning',
+                            'Active': 'primary',
+                            'Completed': 'success',
+                            'Cancelled': 'danger'
+                        } %}
+                        <span class="badge bg-{{ status_colors.get(b.status, 'secondary') }}">{{ b.status }}</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted text-center py-4">No rental history for this customer.</p>
+        {% endif %}
+    </div>
+</div>
+{% elif request.method == 'POST' %}
+<div class="alert alert-warning">
+    <i class="bi bi-exclamation-triangle"></i> No customer found matching your search.
+</div>
+{% endif %}
+{% endblock %}

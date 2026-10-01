@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Daily Sales Report - VRMS{% endblock %}
+{% block page_title %}Daily Sales Report{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-graph-up-arrow"></i> Daily Sales Report</h2>
+    <a href="{{ url_for('reports.dashboard') }}" class="btn btn-outline-secondary">Back to Reports</a>
+</div>
+
+<!-- Date Picker -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="POST" class="row g-2 align-items-center">
+            <div class="col-auto">
+                <label for="report_date" class="col-form-label"><strong>Select Date:</strong></label>
+            </div>
+            <div class="col-auto">
+                <input type="date" class="form-control" id="report_date" name="report_date" value="{{ selected_date }}">
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i> Generate Report
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card card-stats shadow-sm">
+            <div class="card-body">
+                <h6 class="text-muted">Total Sales</h6>
+                <h3 class="mb-0 text-success">${{ "%.2f"|format(total_sales) }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-stats shadow-sm" style="border-left-color: #0d6efd;">
+            <div class="card-body">
+                <h6 class="text-muted">Transactions</h6>
+                <h3 class="mb-0">{{ transaction_count }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-stats shadow-sm" style="border-left-color: #198754;">
+            <div class="card-body">
+                <h6 class="text-muted">Cash Total</h6>
+                <h3 class="mb-0">${{ "%.2f"|format(cash_total) }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-stats shadow-sm" style="border-left-color: #6f42c1;">
+            <div class="card-body">
+                <h6 class="text-muted">Card / EFT Total</h6>
+                <h3 class="mb-0">${{ "%.2f"|format(card_total + eft_total) }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Breakdown Table -->
+<div class="card shadow-sm">
+    <div class="card-header bg-white">
+        <h5 class="mb-0"><i class="bi bi-list-ul"></i> Payment Breakdown ({{ selected_date }})</h5>
+    </div>
+    <div class="card-body">
+        {% if payments %}
+        <table class="table table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Transaction ID</th>
+                    <th>Time</th>
+                    <th>Customer</th>
+                    <th>Method</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in payments %}
+                <tr>
+                    <td><code>{{ p.transaction_id }}</code></td>
+                    <td>{{ p.payment_datetime.strftime('%H:%M') }}</td>
+                    <td>
+                        {% if p.agreement and p.agreement.booking %}
+                            {{ p.agreement.booking.customer.full_name }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <td><span class="badge bg-info">{{ p.payment_method }}</span></td>
+                    <td class="text-success"><strong>${{ "%.2f"|format(p.total_paid) }}</strong></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot class="table-light">
+                <tr>
+                    <td colspan="4" class="text-end"><strong>Cash Total:</strong></td>
+                    <td>${{ "%.2f"|format(cash_total) }}</td>
+                </tr>
+                <tr>
+                    <td colspan="4" class="text-end"><strong>Card Total:</strong></td>
+                    <td>${{ "%.2f"|format(card_total) }}</td>
+                </tr>
+                <tr>
+                    <td colspan="4" class="text-end"><strong>EFT Total:</strong></td>
+                    <td>${{ "%.2f"|format(eft_total) }}</td>
+                </tr>
+                <tr class="table-primary">
+                    <td colspan="4" class="text-end"><strong>GRAND TOTAL:</strong></td>
+                    <td><strong>${{ "%.2f"|format(total_sales) }}</strong></td>
+                </tr>
+            </tfoot>
+        </table>
+        {% else %}
+        <p class="text-muted text-center py-4">No sales recorded on this date.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

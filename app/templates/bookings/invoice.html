@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Invoice - VRMS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Invoice</h2>
+    <div>
+        <a href="{{ url_for('bookings.view_booking', booking_id=booking.booking_id) }}" class="btn btn-outline-secondary">Back</a>
+        <button onclick="window.print()" class="btn btn-primary"><i class="bi bi-printer"></i> Print Invoice</button>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-5">
+        <!-- Invoice Header -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h2 class="text-primary"><i class="bi bi-car-front"></i> VRMS</h2>
+                <p class="text-muted">
+                    Vehicle Rental Management System<br>
+                    123 Main Road, Kimberley<br>
+                    Phone: +27 12 345 6789<br>
+                    Email: info@vrms.com
+                </p>
+            </div>
+            <div class="col-md-6 text-end">
+                <h3>INVOICE</h3>
+                <p class="mb-0"><strong>Invoice #:</strong> INV-{{ booking.booking_id }}-{{ agreement.agreement_id }}</p>
+                <p class="mb-0"><strong>Date:</strong> {{ booking.start_date.strftime('%d %b %Y') }}</p>
+                <p class="mb-0"><strong>Status:</strong> 
+                    {% if payment %}
+                        <span class="badge bg-success">PAID</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark">PENDING</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <hr>
+
+        <!-- Customer & Vehicle Info -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h5 class="text-muted">Billed To:</h5>
+                <p class="mb-0"><strong>{{ booking.customer.full_name }}</strong></p>
+                <p class="mb-0">{{ booking.customer.email }}</p>
+                <p class="mb-0">{{ booking.customer.phone }}</p>
+                <p class="mb-0">{{ booking.customer.address }}</p>
+                <p class="mb-0"><strong>ID:</strong> {{ booking.customer.id_number }}</p>
+            </div>
+            <div class="col-md-6">
+                <h5 class="text-muted">Vehicle Details:</h5>
+                <p class="mb-0"><strong>{{ booking.vehicle.make }} {{ booking.vehicle.model }}</strong></p>
+                <p class="mb-0">Year: {{ booking.vehicle.year }}</p>
+                <p class="mb-0">License Plate: {{ booking.vehicle.license_plate }}</p>
+                <p class="mb-0">Fuel Type: {{ booking.vehicle.fuel_type }}</p>
+                <p class="mb-0">Rental Period: {{ booking.start_date.strftime('%d %b %Y') }} - {{ booking.end_date.strftime('%d %b %Y') }}</p>
+            </div>
+        </div>
+
+        <!-- Line Items Table -->
+        <table class="table table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>Description</th>
+                    <th class="text-end">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Base Rental ({{ booking.rental_days }} days × ${{ "%.2f"|format(booking.vehicle.daily_rate) }})</td>
+                    <td class="text-end">${{ "%.2f"|format(base_amount) }}</td>
+                </tr>
+                {% if late_fee > 0 %}
+                <tr>
+                    <td>Late Return Fee</td>
+                    <td class="text-end">${{ "%.2f"|format(late_fee) }}</td>
+                </tr>
+                {% endif %}
+                {% if fuel_penalty > 0 %}
+                <tr>
+                    <td>Fuel Penalty</td>
+                    <td class="text-end">${{ "%.2f"|format(fuel_penalty) }}</td>
+                </tr>
+                {% endif %}
+                <tr>
+                    <td class="text-end"><strong>Subtotal</strong></td>
+                    <td class="text-end">${{ "%.2f"|format(subtotal) }}</td>
+                </tr>
+                <tr>
+                    <td class="text-end">VAT (15%)</td>
+                    <td class="text-end">${{ "%.2f"|format(vat) }}</td>
+                </tr>
+                <tr class="table-primary">
+                    <td class="text-end"><strong>Total Due</strong></td>
+                    <td class="text-end"><strong>${{ "%.2f"|format(total_due) }}</strong></td>
+                </tr>
+                {% if payment %}
+                <tr>
+                    <td class="text-end">Deposit Paid</td>
+                    <td class="text-end text-success">- ${{ "%.2f"|format(payment.deposit_amount) }}</td>
+                </tr>
+                <tr class="table-success">
+                    <td class="text-end"><strong>Amount Paid</strong></td>
+                    <td class="text-end"><strong>${{ "%.2f"|format(payment.total_paid) }}</strong></td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+
+        <!-- Payment Info -->
+        {% if payment %}
+        <div class="alert alert-success mt-3">
+            <strong>Payment Received:</strong> Transaction ID {{ payment.transaction_id }} via {{ payment.payment_method }} on {{ payment.payment_datetime.strftime('%d %b %Y at %H:%M') }}
+        </div>
+        {% else %}
+        <div class="alert alert-warning mt-3">
+            <strong>Payment Pending:</strong> This invoice has not yet been paid.
+        </div>
+        {% endif %}
+
+        <!-- Footer -->
+        <div class="text-center mt-5 text-muted">
+            <p>Thank you for your business!</p>
+            <p>This is a computer-generated invoice. No signature required.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

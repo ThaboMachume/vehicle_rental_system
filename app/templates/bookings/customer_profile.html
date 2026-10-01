@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}{{ customer.full_name }} - VRMS{% endblock %}
+{% block page_title %}Customer Profile{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-person-circle"></i> {{ customer.full_name }}</h2>
+    <a href="{{ url_for('bookings.customers') }}" class="btn btn-outline-secondary">Back to Customers</a>
+</div>
+
+<div class="row">
+    <div class="col-md-5">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Customer Information</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Customer ID:</strong> CUS-{{ "%03d"|format(customer.customer_id) }}</p>
+                <p><strong>Full Name:</strong> {{ customer.full_name }}</p>
+                <p><strong>ID Number:</strong> {{ customer.id_number }}</p>
+                <p><strong>Driver's License:</strong> {{ customer.drivers_license }}</p>
+                <p><strong>Phone:</strong> {{ customer.phone }}</p>
+                <p><strong>Email:</strong> {{ customer.email }}</p>
+                <p><strong>Address:</strong> {{ customer.address or 'N/A' }}</p>
+                <p><strong>Registered:</strong> {{ customer.created_at.strftime('%d %b %Y') if customer.created_at else 'N/A' }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-clock-history"></i> Rental History ({{ bookings|length }} bookings)</h5>
+            </div>
+            <div class="card-body">
+                {% if bookings %}
+                <table class="table table-sm">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Vehicle</th>
+                            <th>Dates</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in bookings %}
+                        <tr>
+                            <td><code>{{ booking.confirmation_no }}</code></td>
+                            <td>{{ booking.vehicle.make }} {{ booking.vehicle.model }}</td>
+                            <td>
+                                <small>{{ booking.start_date.strftime('%d %b %Y') }}<br>
+                                to {{ booking.end_date.strftime('%d %b %Y') }}</small>
+                            </td>
+                            <td>
+                                {% set status_colors = {
+                                    'Reserved': 'warning',
+                                    'Active': 'primary',
+                                    'Completed': 'success',
+                                    'Cancelled': 'danger'
+                                } %}
+                                <span class="badge bg-{{ status_colors.get(booking.status, 'secondary') }}">
+                                    {{ booking.status }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('bookings.view_booking', booking_id=booking.booking_id) }}" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="text-muted text-center py-4">No rental history for this customer yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

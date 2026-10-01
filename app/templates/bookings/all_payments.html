@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Payments - VRMS{% endblock %}
+{% block page_title %}Payment History{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-credit-card"></i> Payment History</h2>
+    <span class="text-muted">Total: {{ payments|length }} transactions</span>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        {% if payments %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Transaction ID</th>
+                        <th>Date & Time</th>
+                        <th>Agreement</th>
+                        <th>Base Amount</th>
+                        <th>Late Fee</th>
+                        <th>Fuel Penalty</th>
+                        <th>VAT</th>
+                        <th>Total Paid</th>
+                        <th>Method</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in payments %}
+                    <tr>
+                        <td><code>{{ payment.transaction_id }}</code></td>
+                        <td><small>{{ payment.payment_datetime.strftime('%d %b %Y %H:%M') }}</small></td>
+                        <td>
+                            <small>AG-{{ payment.agreement.agreement_number if payment.agreement else 'N/A' }}</small>
+                        </td>
+                        <td>${{ "%.2f"|format(payment.base_amount) }}</td>
+                        <td>${{ "%.2f"|format(payment.late_fee) }}</td>
+                        <td>${{ "%.2f"|format(payment.fuel_penalty) }}</td>
+                        <td>${{ "%.2f"|format(payment.vat_amount) }}</td>
+                        <td><strong class="text-success">${{ "%.2f"|format(payment.total_paid) }}</strong></td>
+                        <td><span class="badge bg-info">{{ payment.payment_method }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted text-center py-4">No payments recorded yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
